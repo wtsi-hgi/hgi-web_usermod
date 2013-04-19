@@ -10,15 +10,30 @@ case class User(id : String)
 
 // Will look up values from LDAP (and cache?)
 object User {
+    
+  implicit val writes = Json.writes[User]
   
   val user = {
     get[String]("id") map { case id => User(id) }
   }
   
+  /**
+   * Get a list of all users.
+   */
   def all() : List[User] = DB.withConnection { implicit c =>
     SQL("select * from user").as(user *)    
   }
   
-  implicit val writes = Json.writes[User]
+  /**
+   * Get a list of all roles a user has.
+   */
+  // TODO
+  def roles(userId : String) = DB.withConnection { implicit c =>
+    SQL(
+      """
+        select 
+      """)
+  }
+
   
 }

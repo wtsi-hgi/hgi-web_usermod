@@ -1,4 +1,5 @@
 package models
+
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Json
 import play.api.Play.current
@@ -17,7 +18,7 @@ object ParameterType {
     Query(ParameterTypes).list
   }
 }
-object ParameterTypes extends Table[ParameterType]("PARAMETER_TYPES") {
+object ParameterTypes extends Table[ParameterType]("PARAMETER_TYPES") with StandardQueries[ParameterType]{
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def name = column[String]("name", O.NotNull)
   def description = column[String]("description", O.Nullable)
@@ -39,7 +40,7 @@ object RoleType {
   }
 }
 
-object RoleTypes extends Table[RoleType]("ROLE_TYPES") {
+object RoleTypes extends Table[RoleType]("ROLE_TYPES")  with StandardQueries[RoleType] {
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def name = column[String]("name", O.NotNull)
   def description = column[String]("description", O.Nullable)
@@ -48,7 +49,7 @@ object RoleTypes extends Table[RoleType]("ROLE_TYPES") {
   def * = id ~ name ~ description.? <> (RoleType.apply _, RoleType.unapply _)
 }
 
-object RoleTypeParameterTypes extends Table[(Long, Long)]("ROLE_TYPE_PARAMETER_TYPE") {
+object RoleTypeParameterTypes extends Table[(Long, Long)]("ROLE_TYPE_PARAMETER_TYPE") with StandardQueries[(Long, Long)]{
   def rtId = column[Long]("role_type_id", O.NotNull)
   def ptId = column[Long]("parameter_type_id", O.NotNull)
   def * = rtId ~ ptId

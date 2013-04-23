@@ -14,3 +14,11 @@ object Parameters extends Table[Parameter]("PARAMETERS") {
 }
 
 case class Role(id : Long, rtId : Long)
+object Roles extends Table[Role]("ROLES") {
+  def id = column[Long]("id", O.PrimaryKey)
+  def rtId = column[Long]("role_type_id", O.NotNull)
+  
+  def * = id ~ rtId <> (Role.apply _, Role.unapply _)
+  
+  def roleType = foreignKey("role_type_fk", rtId, RoleTypes)(_.id)
+}

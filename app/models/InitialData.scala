@@ -24,7 +24,7 @@ import models.dao._
     UserDO(0L, "nc6"))
 
   def insert() {
-    if (ParameterTypes.count == 0 && RoleType.count == 0) {
+    if (ParameterTypes.count == 0 && RoleTypes.count == 0) {
       initialParameterTypes.foreach(ParameterTypes.insert)
       initialRoleTypes.foreach(RoleTypes.insert)
       initialRoleTypeParameterTypes.foreach(RoleTypeParameterTypes.insert)

@@ -4,7 +4,6 @@ import play.api.libs.functional.syntax._
 import play.api.Play.current
 import play.api.db.slick.DB
 import play.api.db.slick.Config.driver.simple._
-import play.api.db.slick.Config.driver.simple._
 
 /**
  * Role type is the prototype for a role.
@@ -16,8 +15,10 @@ private[models] class RoleTypes extends Table[RoleTypeDO]("ROLE_TYPES")  with St
   def name = column[String]("name", O.NotNull)
   def description = column[String]("description", O.Nullable)
 
-  def autoInc = * returning id
   def * = id ~ name ~ description.? <> (RoleTypeDO.apply _, RoleTypeDO.unapply _)
+  def forInsert = name ~ description.? returning id
+  
+  def nameIdx = index("idx_name", name, unique = false)
   
   def parameters = RoleTypeParameterTypes.filter(_.rtId === id).flatMap(_.parameterType)
 }

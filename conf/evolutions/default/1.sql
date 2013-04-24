@@ -10,17 +10,20 @@ alter table "PARAMETERS" add constraint "p_parameter_type_fk" foreign key("param
 alter table "ROLE_TYPE_PARAMETER_TYPE" add constraint "rtpt_role_type_fk" foreign key("role_type_id") references "ROLE_TYPES"("id") on update NO ACTION on delete NO ACTION;
 alter table "ROLE_TYPE_PARAMETER_TYPE" add constraint "rtpt_parameter_type_fk" foreign key("parameter_type_id") references "PARAMETER_TYPES"("id") on update NO ACTION on delete NO ACTION;
 alter table "ROLES" add constraint "r_role_type_fk" foreign key("role_type_id") references "ROLE_TYPES"("id") on update NO ACTION on delete NO ACTION;
+create index "rt_name_idx" on ROLE_TYPES unique("name");
+create index "pt_name_idx" on PARAMETER_TYPES unique("name");
 
 # --- !Downs
 
-alter table "PARAMETERS" drop constraint "parameter_type_fk";
-alter table "ROLE_TYPE_PARAMETER_TYPE" drop constraint "role_type_fk";
-alter table "ROLE_TYPE_PARAMETER_TYPE" drop constraint "parameter_type_fk";
-alter table "ROLES" drop constraint "role_type_fk";
+alter table "PARAMETERS" drop constraint "p_parameter_type_fk";
+alter table "ROLE_TYPE_PARAMETER_TYPE" drop constraint "rtpt_role_type_fk";
+alter table "ROLE_TYPE_PARAMETER_TYPE" drop constraint "rtpt_parameter_type_fk";
+alter table "ROLES" drop constraint "r_role_type_fk";
+drop index "rt_name_idx";
+drop index "pt_name_idx";
 drop table "PARAMETER_TYPES";
 drop table "PARAMETERS";
 drop table "ROLE_TYPE_PARAMETER_TYPE";
 drop table "ROLE_TYPES";
 drop table "ROLES";
 drop table "USERS";
-

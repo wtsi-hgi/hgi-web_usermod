@@ -19,29 +19,43 @@ object RoleType {
   /**
    * Coaelesce pairs of rtdo/ptdo into a single RoleType with associated ParameterTypes.
    */
-  private def coaelesce(results : Seq[(RoleTypeDO, ParameterTypeDO)]) = results.groupBy(_._1).map { case (a,b) =>
-    RoleType(a.name, a.description, b.map{ case (_, c) => ParameterType(c.name, c.description)})
+  private def coaelesce(results : Seq[(RoleTypeDO, Option[String], Option[String])]) = results.groupBy(_._1).map { case (a,b) =>
+    RoleType(a.name, a.description, b.collect{ case (_, Some(name), description) => ParameterType(name, description)})
   }
 
   def all() = DB.withSession { implicit session =>
     val q1 = for {
-      rt <- RoleTypes
-      pt <- rt.parameters
-    } yield (rt, pt)
+      ((rt, _), pt) <- RoleTypes.
+      leftJoin(RoleTypeParameterTypes).on(_.id === _.rtId).
+      leftJoin(ParameterTypes).on(_._2.ptId === _.id)
+    } yield (rt, pt.name.?, pt.description.?)
     
     coaelesce(q1.list)
   }
   
-  def byName(name : String) = DB.withSession { implicit session =>
+  def get(name : String) = DB.withSession { implicit session =>
+        val q1 = for {
+      ((rt, _), pt) <- RoleTypes.
+      leftJoin(RoleTypeParameterTypes).on(_.id === _.rtId).
+      leftJoin(ParameterTypes).on(_._2.ptId === _.id) if (rt.name === name)
+    } yield (rt, pt.name.?, pt.description.?)
+    
+    coaelesce(q1.list)
+  }
+  
+  /**
+   * Get all the parameters for a given role type.
+   */
+  def getParameters(name : String) = DB.withSession { implicit session =>
     val q1 = for {
       rt <- RoleTypes if rt.name === name
       pt <- rt.parameters
-    } yield (rt, pt)
+    } yield pt
     
-    coaelesce(q1.list)
+    q1.list.map(a => ParameterType(a.name, a.description))
   }
   
-  def insert(rt : RoleType) = DB.withSession { implicit session =>
+  private def insert(rt : RoleType) = DB.withSession { implicit session =>
     val params = rt.parameters.map(ParameterType.getOrInsert)
     val roleType = RoleTypes.forInsert insert (rt.name, rt.description)
     params.foreach(RoleTypeParameterTypes.insert(roleType, _))

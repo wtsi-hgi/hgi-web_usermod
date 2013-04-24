@@ -10,4 +10,5 @@ class Roles extends Table[RoleDO]("ROLES") {
   def * = id ~ rtId <> (RoleDO.apply _, RoleDO.unapply _)
   
   def roleType = foreignKey("role_type_fk", rtId, RoleTypes)(_.id)
+  def parameters = Parameters.filter(_.roleId == id)
 }

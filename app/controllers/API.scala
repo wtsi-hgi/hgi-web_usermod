@@ -14,19 +14,4 @@ object API extends Controller {
     
     Ok(Json.prettyPrint(json))
   }
-  
-  def allRoleTypes() = Action {
-    val roles = RoleType.all().map(a => Json.toJson(a))
-    val json = Json.obj("roles" -> roles)
-    
-    Ok(Json.prettyPrint(json))
-  }
-  
-  def singleRoleType(name : String) = Action {
-    val roles = RoleType.byName(name).map(a => Json.toJson(a)).headOption
-    
-    Ok(roles.map(Json.prettyPrint).getOrElse(""))
-    
-  }
-
 }

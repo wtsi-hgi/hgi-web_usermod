@@ -3,8 +3,8 @@ package controllers
 import play.api._
 import play.api.mvc._
 import play.api.libs.json.Json
-import models.User
-import models.RoleType
+
+import models._
 
 object API extends Controller {
 

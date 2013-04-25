@@ -55,15 +55,14 @@ class ApplicationSpec extends Specification {
       running(FakeApplication()) {
         val json = """
           {"name":"create_project","parameters":[]}
-          """
+          """.trim
 
         val createRole = route(new FakeRequest(POST, "/roles",
           FakeHeaders(Seq("Content-Type" -> Seq("application/json"))),
-          json)).get
+          Json.parse(json))).get
 
         status(createRole) must equalTo(OK)
         contentType(createRole) must beSome("application/json")
-        contentAsString(createRole) must contain("banabas")
       }
     }
   }

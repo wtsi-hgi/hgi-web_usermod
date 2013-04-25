@@ -6,4 +6,5 @@ import play.api.libs.functional.syntax._
 case class Parameter(name : String, value : String)
 object Parameter {
   implicit val toJson = Json.writes[Parameter]
+  implicit val fromJson = Json.reads[Parameter]
 }

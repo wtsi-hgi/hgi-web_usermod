@@ -12,20 +12,20 @@ object RoleType extends Controller {
     val roles = models.RoleType.all().map(a => Json.toJson(a))
     val json = Json.obj("roles" -> roles)
 
-    Ok(Json.prettyPrint(json))
+    Ok(json)
   }
 
   def get(name: String) = Action {
     val roles = models.RoleType.get(name).map(a => Json.toJson(a)).headOption
 
-    Ok(roles.map(Json.prettyPrint).getOrElse(""))
+    Ok(roles.getOrElse(Json.obj()))
   }
   
   def parameters(name : String) = Action {
     val parameters = models.RoleType.getParameters(name).map(a => Json.toJson(a))
     val json = Json.obj("parameters" -> parameters)
     
-    Ok(Json.prettyPrint(json))
+    Ok(json)
   }
 
 }

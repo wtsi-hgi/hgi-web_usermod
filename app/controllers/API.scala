@@ -12,6 +12,6 @@ object API extends Controller {
     val users = User.all().map(a => Json.toJson(a))
     val json = Json.obj("users" -> users)
     
-    Ok(Json.prettyPrint(json))
+    Ok(json)
   }
 }

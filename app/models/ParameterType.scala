@@ -13,13 +13,16 @@ object ParameterType {
   implicit val toJson = Json.writes[ParameterType]
   implicit val fromJson = Json.reads[ParameterType]
   
+  def get(name : String) = DB.withSession { implicit session =>
+    Query(ParameterTypes).filter(_.name === name).firstOption
+  }
+  
   /**
    * Check whether a matching parameter type already exists in the database, and
    * return its id if so. Otherwise, add a new parameter type and return that id.
    */
   def getOrInsert(pt : ParameterType) : Long = DB.withSession { implicit session =>
-    val existing = Query(ParameterTypes).filter(_.name === pt.name).map(_.id).firstOption
-    existing.getOrElse(insert(pt))
+    get(pt.name).map(_.id).getOrElse(insert(pt))
   }
   
   private def insert(pt : ParameterType) : Long = DB.withSession { implicit session =>

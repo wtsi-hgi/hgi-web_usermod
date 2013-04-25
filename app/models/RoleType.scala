@@ -40,7 +40,7 @@ object RoleType {
       leftJoin(ParameterTypes).on(_._2.ptId === _.id) if (rt.name === name)
     } yield (rt, pt.name.?, pt.description.?)
     
-    coaelesce(q1.list)
+    coaelesce(q1.list).headOption
   }
   
   /**

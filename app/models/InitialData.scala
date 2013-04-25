@@ -22,16 +22,26 @@ import models.dao._
 
   val initialUsers = Seq(
     UserDO(0L, "nc6"))
+    
+  val initialRoles = Seq(
+    RoleDO(0L, 1L)
+  )
+  
+  val initialUserRoles = Seq(
+      (0L, 0L)
+  )
 
   def insert() {
     if (ParameterTypes.count == 0 && RoleTypes.count == 0) {
       initialParameterTypes.foreach(ParameterTypes.insert)
       initialRoleTypes.foreach(RoleTypes.insert)
       initialRoleTypeParameterTypes.foreach(RoleTypeParameterTypes.insert)
+      initialRoles.foreach(Roles.insert)
     }
     
     if (Users.count == 0) {
       initialUsers.foreach(Users.insert)
+      initialUserRoles.foreach(UserRoles.insert)
     }
   }
 

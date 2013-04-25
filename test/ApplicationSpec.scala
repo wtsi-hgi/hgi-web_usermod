@@ -4,6 +4,7 @@ import org.specs2.mutable._
 
 import play.api.test._
 import play.api.test.Helpers._
+import play.api.libs.json._
 
 /**
  * Add your spec here.
@@ -48,6 +49,37 @@ class ApplicationSpec extends Specification {
         contentType(users) must beSome.which(_ == "application/json")
         contentAsString(users) must contain("nc6")
       }
+    }
+
+    "insert a role, using route POST /routes" in {
+      running(FakeApplication()) {
+        val json = """
+          {"name":"create_project","parameters":[]}
+          """
+
+        val createRole = route(new FakeRequest(POST, "/roles",
+          FakeHeaders(Seq("Content-Type" -> Seq("application/json"))),
+          json)).get
+
+        status(createRole) must equalTo(OK)
+        contentType(createRole) must beSome("application/json")
+        contentAsString(createRole) must contain("banabas")
+      }
+    }
+  }
+  
+  "Role" should {
+    import models._
+    
+    "serialise and deserialise correctly" in {
+      val role = Role("testing_stuff", Seq(Parameter("with_this", "set to this")))
+      val json = Json.stringify(Json.toJson(role))
+      
+      json.trim() mustEqual """{"name":"testing_stuff","parameters":[{"name":"with_this","value":"set to this"}]}"""
+      
+      val parsed = Json.fromJson[Role](Json.parse(json)).asOpt
+      parsed must beSome.which(_ == role)
+      
     }
   }
 }

@@ -3,7 +3,7 @@ package models.dao
 import play.api.db.slick.Config.driver.simple._
 
 private[models] case class ParameterDO(id: Long, roleId: Long, ptId: Long, value: String)
-private[models] object Parameters extends Table[ParameterDO]("PARAMETERS") {
+private[models] class Parameters extends Table[ParameterDO]("PARAMETERS") {
   def id = column[Long]("id", O.PrimaryKey)
   def roleId = column[Long]("role_id", O.NotNull)
   def ptId = column[Long]("parameter_type_id", O.NotNull)

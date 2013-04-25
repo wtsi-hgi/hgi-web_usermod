@@ -11,6 +11,7 @@ GET   /roleTypes/:name            controllers.RoleType.get(name : String)
 GET   /roleTypes/:name/parameters controllers.RoleType.parameters(name : String)
 
 GET   /roles                      controllers.Role.all
+POST  /roles                      controllers.Role.addRole
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

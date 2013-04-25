@@ -20,8 +20,7 @@ object Role {
 
   def all() = DB.withSession { implicit session =>
     val q1 = for {
-      (r, p) <- Roles leftJoin dao.Parameters on (_.id === _.roleId)
-      pt <- p.parameterType
+      ((r, p), pt) <- Roles leftJoin dao.Parameters on (_.id === _.roleId) leftJoin dao.ParameterTypes on (_._2.ptId === _.id)
       rt <- r.roleType
     } yield (rt.name, pt.name.?, p.value.?)
 

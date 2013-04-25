@@ -7,7 +7,7 @@ import play.api.db.slick.Config.driver.simple._
 
 private[models] case class UserDO(id: Long, sid: String)
 
-private[models] object Users extends Table[UserDO]("USERS") with StandardQueries[UserDO] {
+private[models] class Users extends Table[UserDO]("USERS") with StandardQueries[UserDO] {
   
   def id = column[Long]("id", O.PrimaryKey)
   def sid = column[String]("sid", O.NotNull)
@@ -15,7 +15,7 @@ private[models] object Users extends Table[UserDO]("USERS") with StandardQueries
   def * = id ~ sid <> (UserDO.apply _, UserDO.unapply _)
 }
 
-private[models] object UserRoles extends Table[(Long, Long)]("USER_ROLES") with StandardQueries[(Long, Long)] {
+private[models] class UserRoles extends Table[(Long, Long)]("USER_ROLES") with StandardQueries[(Long, Long)] {
   def userId = column[Long]("user_id", O.NotNull)
   def roleId = column[Long]("role_id", O.NotNull)
   

@@ -27,6 +27,15 @@ object Role {
     coaelesce(q1.list)
   }
 
+  private[models] def get(id: Long) = DB.withSession { implicit session =>
+    val q1 = for {
+      ((r, p), pt) <- Roles leftJoin dao.Parameters on (_.id === _.roleId) leftJoin dao.ParameterTypes on (_._2.ptId === _.id) if r.id === id
+      rt <- r.roleType
+    } yield (rt.name, pt.name.?, p.value.?)
+
+    coaelesce(q1.list).headOption
+  }
+
   /**
    * Insert a new role. This will fail if either the role type or any parameter type does not exist,
    * or if the parameters are not appropriate to that role. It will also fail if not all parameters have been provided.
@@ -45,15 +54,16 @@ object Role {
     val ids = (roleType, missingParameters, surplusParameters) match {
       case (Right(roleType), m, s) if (m.isEmpty && s.isEmpty) => Right(
         (roleType.id, role.parameters map (p => parameterIdMap(p.name) -> p.value)))
-      case (Left(r), m, s) => Left(r +:
-        m.toSeq.map("Missing parameter value for parameter type: " + _) ++:
-        s.toSeq.map("Cannot add parameter for missing parameter type: " + _))
+      case (r, m, s) => Left(
+        r.left.toSeq ++:
+          m.toSeq.map("Missing parameter value for parameter type: " + _) ++:
+          s.toSeq.map("Cannot add parameter for missing parameter type: " + _))
     }
 
     ids.right.map {
       case (roleTypeId, parameters) => {
         val roleId = dao.Roles.forInsert insert roleTypeId
-        parameters.foreach{case (id, value) => dao.Parameters.forInsert insert (roleId, id, value)}
+        parameters.foreach { case (id, value) => dao.Parameters.forInsert insert (roleId, id, value) }
         roleId
       }
     }

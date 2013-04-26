@@ -9,10 +9,12 @@ private[models] case class UserDO(id: Long, sid: String)
 
 private[models] class Users extends Table[UserDO]("USERS") with StandardQueries[UserDO] {
   
-  def id = column[Long]("id", O.PrimaryKey)
+  def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def sid = column[String]("sid", O.NotNull)
 
   def * = id ~ sid <> (UserDO.apply _, UserDO.unapply _)
+  
+  def roles = UserRoles.filter(_.userId === id).flatMap(_.role)
 }
 
 private[models] class UserRoles extends Table[(Long, Long)]("USER_ROLES") with StandardQueries[(Long, Long)] {
@@ -21,6 +23,6 @@ private[models] class UserRoles extends Table[(Long, Long)]("USER_ROLES") with S
   
   def * = userId ~ roleId
   
-  def userFk = foreignKey("ur_user_fk", userId, Users)(_.id)
-  def roleFk = foreignKey("ur_role_fk", roleId, Roles)(_.id)
+  def user = foreignKey("ur_user_fk", userId, Users)(_.id)
+  def role = foreignKey("ur_role_fk", roleId, Roles)(_.id)
 }

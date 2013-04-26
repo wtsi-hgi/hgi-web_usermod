@@ -5,6 +5,8 @@
 # Home page
 GET   /                           controllers.Application.index
 GET		/users						          controllers.API.allUsers
+GET   /users/:sid                 controllers.API.getUser(sid : String)
+GET   /users/:sid/roles           controllers.API.userRoles(sid : String)
 
 GET		/roleTypes						      controllers.RoleType.all
 GET   /roleTypes/:name            controllers.RoleType.get(name : String)

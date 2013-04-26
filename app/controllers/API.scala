@@ -14,4 +14,16 @@ object API extends Controller {
     
     Ok(json)
   }
+  
+  def getUser(sid : String) = Action {
+    val user = User.get(sid).map(a => Json.toJson(a))
+    user.map(Ok(_)).getOrElse(NotFound("No user with sid "+sid+" is registered in the system."))        
+  }
+  
+  def userRoles(sid : String) = Action {
+    val roles = User.roles(sid).map(a => Json.toJson(a))
+    val json = Json.obj("roles" -> roles)
+    
+    Ok(json)
+  }
 }

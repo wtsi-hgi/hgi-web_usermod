@@ -6,6 +6,7 @@ import play.api.libs.json.Json
 import models._
 import play.api.libs.json.JsError
 import scala.util.parsing.combinator.RegexParsers
+import global.Authenticated.authenticated
 
 object Role extends Controller {
 
@@ -17,14 +18,16 @@ object Role extends Controller {
   }
 
   // TODO make this a verified action
-  def addRole() = Action(parse.json) { request =>
-    request.body.validate[Role].map { role =>
-      models.Role.insert(role) match {
-        case Right(id) => Ok(Json.obj("id" -> id))
-        case Left(errs) => Forbidden(Json.arr(errs))
+  def addRole() = authenticated { user =>
+    Action(parse.json) { request =>
+      request.body.validate[Role].map { role =>
+        models.Role.insert(role) match {
+          case Right(id) => Ok(Json.obj("id" -> id))
+          case Left(errs) => Forbidden(Json.arr(errs))
+        }
+      }.recoverTotal { jsErr =>
+        BadRequest(JsError.toFlatJson(jsErr))
       }
-    }.recoverTotal { jsErr =>
-      BadRequest(JsError.toFlatJson(jsErr))
     }
   }
 

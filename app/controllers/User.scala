@@ -5,6 +5,7 @@ import play.api.mvc._
 import play.api.libs.json.Json
 import models._
 import play.api.libs.json.JsError
+import global.Authenticated.authenticated
 
 object User extends Controller {
 
@@ -27,14 +28,16 @@ object User extends Controller {
     Ok(json)
   }
 
-  def addRole(sid: String) = Action(parse.json) { request =>
-    request.body.validate[Role].map { role =>
-      models.User.addRole(sid,role) match {
-        case Right(id) => Ok(Json.obj("id" -> id))
-        case Left(errs) => Forbidden(Json.arr(errs))
+  def addRole(sid: String) = authenticated { user =>
+    Action(parse.json) { request =>
+      request.body.validate[Role].map { role =>
+        models.User.addRole(sid, role) match {
+          case Right(id) => Ok(Json.obj("id" -> id))
+          case Left(errs) => Forbidden(Json.arr(errs))
+        }
+      }.recoverTotal { jsErr =>
+        BadRequest(JsError.toFlatJson(jsErr))
       }
-    }.recoverTotal { jsErr =>
-      BadRequest(JsError.toFlatJson(jsErr))
     }
   }
 

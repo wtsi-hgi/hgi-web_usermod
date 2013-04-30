@@ -18,7 +18,7 @@ object Role extends Controller {
   }
 
   // TODO make this a verified action
-  def addRole() = authenticated { user =>
+  def add() = authenticated { user =>
     Action(parse.json) { request =>
       request.body.validate[Role].map { role =>
         models.Role.insert(role) match {
@@ -27,6 +27,21 @@ object Role extends Controller {
         }
       }.recoverTotal { jsErr =>
         BadRequest(JsError.toFlatJson(jsErr))
+      }
+    }
+  }
+
+  def delete(role: String) = authenticated { user =>
+    Action {
+      URIParameters.parse(role) match {
+        case URIParameters.Success((name, keyvals), _) => {
+          val role = models.Role(name, keyvals map (Function.tupled(Parameter.apply)))
+          models.Role.remove(role).
+            map(a => Ok(Json.obj("removed" -> a))).
+            getOrElse(BadRequest(s"Role: $role does not exist."))
+        }
+        case URIParameters.Failure(msg, _) => BadRequest(s"Parse failure: $msg \n Input: $role")
+        case URIParameters.Error(msg, _) => BadRequest(s"Parse error: $msg \n Input: $role")
       }
     }
   }
@@ -45,6 +60,52 @@ object Role extends Controller {
       }
       case URIParameters.Failure(msg, _) => BadRequest(s"Parse failure: $msg \n Input: $role")
       case URIParameters.Error(msg, _) => BadRequest(s"Parse error: $msg \n Input: $role")
+    }
+  }
+
+  def addUserRole(sid: String, role: String) = authenticated { user =>
+    Action {
+      URIParameters.parse(role) match {
+        case URIParameters.Success((name, keyvals), _) => {
+          val role = models.Role(name, keyvals map (Function.tupled(Parameter.apply)))
+          models.User.addRole(sid, role) match {
+            case Right(id) => Ok(Json.obj("id" -> id))
+            case Left(errs) => Forbidden(Json.arr(errs))
+          }
+        }
+        case URIParameters.Failure(msg, _) => BadRequest(s"Parse failure: $msg \n Input: $role")
+        case URIParameters.Error(msg, _) => BadRequest(s"Parse error: $msg \n Input: $role")
+      }
+    }
+  }
+
+  def hasUserRole(sid: String, role: String) = Action {
+    URIParameters.parse(role) match {
+      case URIParameters.Success((name, keyvals), _) => {
+        val role = models.Role(name, keyvals map (Function.tupled(Parameter.apply)))
+        val hasRole = models.User.hasRole(sid, role)
+        Ok(Json.obj("has_role" -> hasRole))
+      }
+      case URIParameters.Failure(msg, _) => BadRequest(s"Parse failure: $msg \n Input: $role")
+      case URIParameters.Error(msg, _) => BadRequest(s"Parse error: $msg \n Input: $role")
+    }
+  }
+
+  def deleteUserRole(sid: String, role: String) = authenticated { user =>
+    Action {
+      URIParameters.parse(role) match {
+        case URIParameters.Success((name, keyvals), _) => {
+          val role = models.Role(name, keyvals map (Function.tupled(Parameter.apply)))
+          val numRemoved = models.User.removeRole(sid, role)
+          numRemoved match {
+            case Some(number) => Ok(Json.obj("removed" -> number))
+            case None => BadRequest(s"User $sid does not possess role $role")
+          }
+
+        }
+        case URIParameters.Failure(msg, _) => BadRequest(s"Parse failure: $msg \n Input: $role")
+        case URIParameters.Error(msg, _) => BadRequest(s"Parse error: $msg \n Input: $role")
+      }
     }
   }
 

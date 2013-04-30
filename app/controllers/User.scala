@@ -40,5 +40,4 @@ object User extends Controller {
       }
     }
   }
-
 }

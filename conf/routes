@@ -3,11 +3,14 @@
 # ~~~~
 
 # Home page
-GET   /                           controllers.Application.index
-GET		/users						          controllers.User.all
-GET   /users/:sid                 controllers.User.get(sid : String)
-GET   /users/:sid/roles           controllers.User.roles(sid : String)
+GET    /                           controllers.Application.index
+GET		 /users						          controllers.User.all
+GET    /users/:sid                 controllers.User.get(sid : String)
+GET    /users/:sid/roles           controllers.User.roles(sid : String)
 POST   /users/:sid/roles          controllers.User.addRole(sid : String)
+PUT    /users/:sid/roles/:role    controllers.Role.addUserRole(sid : String, role : String)
+GET    /users/:sid/roles/:role    controllers.Role.hasUserRole(sid : String, role : String)
+DELETE /users/:sid/roles/:role    controllers.Role.deleteUserRole(sid : String, role : String)
 
 
 GET		/roleTypes						      controllers.RoleType.all
@@ -15,8 +18,12 @@ GET   /roleTypes/:name            controllers.RoleType.get(name : String)
 GET   /roleTypes/:name/parameters controllers.RoleType.parameters(name : String)
 
 GET   /roles                      controllers.Role.all
-POST  /roles                      controllers.Role.addRole
+POST  /roles                      controllers.Role.add
+DELETE   /roles/:role             controllers.Role.delete(role : String)
 GET   /roles/:role/users          controllers.Role.users(role : String)
+PUT    /roles/:role/users/:sid    controllers.Role.addUserRole(sid : String, role : String)
+GET    /roles/:role/users/:sid    controllers.Role.hasUserRole(sid : String, role : String)
+DELETE /roles/:role/users/:sid    controllers.Role.deleteUserRole(sid : String, role : String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

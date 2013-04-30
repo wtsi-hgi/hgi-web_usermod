@@ -105,4 +105,15 @@ object Role {
       }
     }
   }
+
+  /**
+   * Remove a role. This will remove the role from all users.
+   */
+  def remove(role: Role) = DB.withSession { implicit session =>
+    find(role) map { id =>
+      Query(UserRoles).filter(_.roleId === id).delete
+      Query(dao.Parameters).filter(_.roleId === id).delete
+      Query(Roles).filter(_.id === id).delete
+    }
+  }
 }

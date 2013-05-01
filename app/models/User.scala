@@ -36,13 +36,15 @@ object User {
   def addRole(sid: String, role: Role) = DB.withSession { implicit session =>
 
     def insertUserRole(user: Long, role: Long) = {
-      val either = nonFatalCatch.either(models.dao.UserRoles.insert((user, role)))
-      either.left.map(a => Seq(a.getMessage()))
+      Query(UserRoles).filter(ur => ur.roleId === role && ur.userId === user).firstOption.map(ur => Right(ur._1)).getOrElse {
+        val either = nonFatalCatch.either(models.dao.UserRoles.insert((user, role)))
+        either.left.map(a => Seq(a.getMessage()))
+      }
     }
 
     for {
       user <- Query(Users).filter(_.sid === sid).firstOption.toRight(Seq("User " + sid + " does not exist in the system.")).right
-      insertedRole <- models.Role.insert(role).right
+      insertedRole <- models.Role.add(role).right
       insertedUserRole <- insertUserRole(user.id, insertedRole).right
     } yield insertedRole
   }

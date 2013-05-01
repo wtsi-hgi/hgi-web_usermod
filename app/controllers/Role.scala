@@ -33,7 +33,7 @@ object Role extends Controller {
     Action(parse.json) { request =>
       request.body.validate[Role].map { role =>
         if (canSetGlobalRole(user)) {
-          models.Role.insert(role) match {
+          models.Role.add(role) match {
             case Right(id) => Ok(Json.obj("id" -> id))
             case Left(errs) => Forbidden(Json.arr(errs))
           }

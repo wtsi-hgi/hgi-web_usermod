@@ -74,7 +74,7 @@ object Role {
    *
    * @Return either Right(id) of the new role, or Left(message) that describes the problem.
    */
-  def insert(role: Role): Either[Seq[String], Long] = DB.withSession { implicit session =>
+  def add(role: Role): Either[Seq[String], Long] = DB.withSession { implicit session =>
     find(role) match {
       case Some(id) => Right(id)
       case None => {

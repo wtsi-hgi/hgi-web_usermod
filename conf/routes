@@ -3,10 +3,10 @@
 # ~~~~
 
 # Home page
-GET    /                           controllers.Application.index
+GET    /                          controllers.Application.index
 GET		 /users						          controllers.User.all
-GET    /users/:sid                 controllers.User.get(sid : String)
-GET    /users/:sid/roles           controllers.User.roles(sid : String)
+GET    /users/:sid                controllers.User.get(sid : String)
+GET    /users/:sid/roles          controllers.User.roles(sid : String)
 POST   /users/:sid/roles          controllers.User.addRole(sid : String)
 PUT    /users/:sid/roles/:role    controllers.Role.addUserRole(sid : String, role : String)
 GET    /users/:sid/roles/:role    controllers.Role.hasUserRole(sid : String, role : String)

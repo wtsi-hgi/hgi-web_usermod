@@ -7,6 +7,7 @@ import models._
 import play.api.libs.json.JsError
 import scala.util.parsing.combinator.RegexParsers
 import global.Authenticated.authenticated
+import rules.WhoCanModify._
 
 object Role extends Controller {
 
@@ -28,13 +29,16 @@ object Role extends Controller {
     }
   }
 
-  // TODO make this a verified action
   def add() = authenticated { user =>
     Action(parse.json) { request =>
       request.body.validate[Role].map { role =>
-        models.Role.insert(role) match {
-          case Right(id) => Ok(Json.obj("id" -> id))
-          case Left(errs) => Forbidden(Json.arr(errs))
+        if (canSetGlobalRole(user)) {
+          models.Role.insert(role) match {
+            case Right(id) => Ok(Json.obj("id" -> id))
+            case Left(errs) => Forbidden(Json.arr(errs))
+          }
+        } else {
+          Forbidden(Json.arr("No permission to set global roles."))
         }
       }.recoverTotal { jsErr =>
         BadRequest(JsError.toFlatJson(jsErr))
@@ -45,9 +49,14 @@ object Role extends Controller {
   def delete(role: String) = authenticated { user =>
     Action {
       withParsedRole(role) { role =>
-        models.Role.remove(role).
-          map(a => Ok(Json.obj("removed" -> a))).
-          getOrElse(BadRequest(s"Role: $role does not exist."))
+        if (canSetGlobalRole(user)) {
+          models.Role.remove(role).
+            map(a => Ok(Json.obj("removed" -> a))).
+            getOrElse(BadRequest(s"Role: $role does not exist."))
+
+        } else {
+          Forbidden("No permission to set global roles.")
+        }
       }
     }
   }
@@ -67,9 +76,13 @@ object Role extends Controller {
   def addUserRole(sid: String, role: String) = authenticated { user =>
     Action {
       withParsedRole(role) { role =>
-        models.User.addRole(sid, role) match {
-          case Right(id) => Ok(Json.obj("id" -> id))
-          case Left(errs) => Forbidden(Json.arr(errs))
+        if (canDo(models.User(user), models.User(sid), role)) {
+          models.User.addRole(sid, role) match {
+            case Right(id) => Ok(Json.obj("id" -> id))
+            case Left(errs) => Forbidden(Json.arr(errs))
+          }
+        } else {
+          Forbidden("No permission to add role.")
         }
       }
     }
@@ -85,10 +98,14 @@ object Role extends Controller {
   def deleteUserRole(sid: String, role: String) = authenticated { user =>
     Action {
       withParsedRole(role) { role =>
-        val numRemoved = models.User.removeRole(sid, role)
-        numRemoved match {
-          case Some(number) => Ok(Json.obj("removed" -> number))
-          case None => BadRequest(s"User $sid does not possess role $role")
+        if (canDo(models.User(user), models.User(sid), role)) {
+          val numRemoved = models.User.removeRole(sid, role)
+          numRemoved match {
+            case Some(number) => Ok(Json.obj("removed" -> number))
+            case None => BadRequest(s"User $sid does not possess role $role")
+          }
+        } else {
+          Forbidden("No permission to remove role.")
         }
       }
     }

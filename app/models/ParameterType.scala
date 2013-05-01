@@ -8,7 +8,10 @@ import play.api.db.slick.Config.driver.simple._
 
 import dao.ParameterTypes
 
-case class ParameterType(name : String, description : Option[String])
+case class ParameterType(name : String, description : Option[String]) {
+  def instantiate(value : String) = Parameter(name, value)
+}
+
 object ParameterType { 
   implicit val toJson = Json.writes[ParameterType]
   implicit val fromJson = Json.reads[ParameterType]

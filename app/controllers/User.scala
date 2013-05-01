@@ -6,6 +6,7 @@ import play.api.libs.json.Json
 import models._
 import play.api.libs.json.JsError
 import global.Authenticated.authenticated
+import rules.WhoCanModify.canDo
 
 object User extends Controller {
 
@@ -31,9 +32,13 @@ object User extends Controller {
   def addRole(sid: String) = authenticated { user =>
     Action(parse.json) { request =>
       request.body.validate[Role].map { role =>
-        models.User.addRole(sid, role) match {
-          case Right(id) => Ok(Json.obj("id" -> id))
-          case Left(errs) => Forbidden(Json.arr(errs))
+        if (canDo(models.User(user), models.User(sid), role)) {
+          models.User.addRole(sid, role) match {
+            case Right(id) => Ok(Json.obj("id" -> id))
+            case Left(errs) => Forbidden(Json.arr(errs))
+          }
+        } else {
+          Forbidden(Json.arr("No permission to add role."))
         }
       }.recoverTotal { jsErr =>
         BadRequest(JsError.toFlatJson(jsErr))

@@ -13,11 +13,15 @@ import models.dao._
     RoleTypeDO(0L, "create_project", Some("Can create projects.")),
     RoleTypeDO(1L, "set_global_role", Some("Can set roles globally.")),
     RoleTypeDO(2L, "delegate", Some("Can delegate permissions for this project.")),
-    RoleTypeDO(3L, "manage_project_users", Some("Can manage users for this project.")))
+    RoleTypeDO(3L, "manage_project_users", Some("Can manage users for this project.")),
+    RoleTypeDO(4L, "manage_project_datasets", Some("Can manage datasets for this project.")),
+    RoleTypeDO(5L, "manage_project_resources", Some("Can manage resources for this project.")))
     
   val initialRoleTypeParameterTypes = Seq(
     (2L, 0L),
-    (3L, 0L)
+    (3L, 0L),
+    (4L, 0L),
+    (5L, 0L)
   )
 
   val initialUsers = Seq(

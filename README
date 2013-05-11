@@ -1,4 +1,9 @@
-This is your new Play 2.1 application
-=====================================
+User module for HGI-web, implementing role-based access control (RBAC). 
 
-This file will be packaged with your application, when using `play dist`.
+To install, clone the github repository, change into hgi-web_usermod, and run Scala Built Tool (sbt).
+
+You can also use the sbt bootstrapping script from https://github.com/paulp/sbt-extras by running:
+
+wget -O ~/bin/sbt https://raw.github.com/paulp/sbt-extras/master/sbt
+~/bin/sbt
+

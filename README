@@ -4,6 +4,7 @@ To install, clone the github repository, change into hgi-web_usermod, and run Sc
 
 You can also use the sbt bootstrapping script from https://github.com/paulp/sbt-extras by running:
 
-wget -O ~/bin/sbt https://raw.github.com/paulp/sbt-extras/master/sbt
-~/bin/sbt
+wget -O ./sbt https://raw.github.com/paulp/sbt-extras/master/sbt
+chmod a+x ./sbt
+./sbt
 

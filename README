@@ -8,3 +8,12 @@ wget -O ./sbt https://raw.github.com/paulp/sbt-extras/master/sbt
 chmod a+x ./sbt
 ./sbt
 
+That should install all prerequisites and leave you at the sbt project shell:
+[hgi-web_usermod] $
+
+From which you can enter the play console:
+[hgi-web_usermod] $ play
+
+After which you can start a dev instance (in this case on port 9000) by running:
+[hgi-web_usermod] $ run 9000
+

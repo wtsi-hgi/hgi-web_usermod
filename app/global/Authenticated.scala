@@ -17,7 +17,7 @@ import play.api.Play.current
  * Format is base64($user:$expiration:$shib_session_id:$salt:$mac) where $mac is the HMAC-MD5 of the rest of it.
  */
 abstract class Authenticated(keyString: String) {
-  
+
   protected[this] case class Token(user: String, expires: Date, shib: String, salt: String, mac: String)
 
   protected[this] object L {
@@ -35,12 +35,15 @@ abstract class Authenticated(keyString: String) {
     val parts = new String(Base64.decodeBase64(token)).split(":").toList
     parts match {
       case (user :: (L(expires) :: shib :: salt :: mac :: Nil)) => Some(Token(user, new Date(expires * 1000), shib, salt, mac))
-      case _ => None
+      case _ => {
+        Logger.debug("Cannot parse time from token: " + token)
+        None
+      }
     }
   }
 
   protected[this] def hmac(raw: Array[Byte]) = {
-    val key = new SecretKeySpec(keyString.getBytes(), "HmacMD5")
+    val key = new SecretKeySpec(Base64.decodeBase64(keyString), "HmacMD5")
     val mac = Mac.getInstance("HmacMD5")
     mac.init(key)
     mac.doFinal(raw)
@@ -50,7 +53,10 @@ abstract class Authenticated(keyString: String) {
     Logger.debug(s"Token: $token")
     val now = (new java.util.Date).getTime()
     val timeRemaining = token.expires.getTime - now
-    (timeRemaining > 0) && {
+    if (timeRemaining < 0) {
+      Logger.debug("Token has expired on " + token.expires)
+      false
+    } else {
       Logger.debug(s"Auth token has $timeRemaining milliseconds remaining.")
       val raw = s"${token.user}:${token.expires.getTime() / 1000}:${token.shib}:${token.salt}"
       Base64.decodeBase64(token.mac).sameElements(hmac(raw.getBytes()))
@@ -63,7 +69,7 @@ abstract class Authenticated(keyString: String) {
   } yield token.user
 
   // TODO work out unauthorized behaviour.
-  protected[this] def onUnauthorized(request: RequestHeader) = Results.Redirect(routes.Application.index)
+  protected[this] def onUnauthorized(request: RequestHeader) = Results.Unauthorized
 
   /**
    * Wrap the given action in an authentication context. It will only be executed if successful authentication is presented.

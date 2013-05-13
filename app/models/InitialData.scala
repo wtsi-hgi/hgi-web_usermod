@@ -25,7 +25,7 @@ import models.dao._
   )
 
   val initialUsers = Seq(
-    UserDO(0L, "nc6"))
+    UserDO(0L, "nc6@sanger.ac.uk"))
     
   val initialRoles = Seq(
     RoleDO(0L, 1L)

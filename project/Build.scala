@@ -12,6 +12,7 @@ object ApplicationBuild extends Build {
     jdbc,
     "com.typesafe.play" %% "play-slick" % "0.3.2",
     "org.scalaz" %% "scalaz-core" % "7.0.0",
+    "mysql" % "mysql-connector-java" % "5.1.25",
     "commons-codec" % "commons-codec" % "1.8"
   )
 

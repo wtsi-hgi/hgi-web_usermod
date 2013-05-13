@@ -18,3 +18,4 @@ dist
 bin
 play
 sbt
+conf/production.conf

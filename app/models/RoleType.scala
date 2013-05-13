@@ -67,7 +67,7 @@ object RoleType {
     q1.list.map(a => ParameterType(a.name, a.description))
   }
 
-  private def insert(rt: RoleType) = DB.withSession { implicit session =>
+  private[models] def insert(rt: RoleType) = DB.withSession { implicit session =>
     val params = rt.parameters.map(ParameterType.getOrInsert)
     val roleType = RoleTypes.forInsert insert (rt.name, rt.description)
     params.foreach(RoleTypeParameterTypes.insert(roleType, _))

@@ -28,15 +28,16 @@ abstract class Authenticated(keyString: String) {
     }
   }
 
-  // Maybe a bit nicer?
+  // Maybe a bit nicer? At the moment, this just drops the 'Bearer' string to get the actual token.
   protected[this] def getToken(auth: String) = auth.drop(7)
 
   protected[this] def decodeToken(token: String) = {
+    Logger.debug(s"Token: $token")
     val parts = new String(Base64.decodeBase64(token)).split(":").toList
     parts match {
       case (user :: (L(expires) :: shib :: salt :: mac :: Nil)) => Some(Token(user, new Date(expires * 1000), shib, salt, mac))
       case _ => {
-        Logger.debug("Cannot parse time from token: " + token)
+        Logger.debug("Cannot parse token: " + token)
         None
       }
     }
@@ -50,7 +51,6 @@ abstract class Authenticated(keyString: String) {
   }
 
   protected[this] def verifyHmac(token: Token) = {
-    Logger.debug(s"Token: $token")
     val now = (new java.util.Date).getTime()
     val timeRemaining = token.expires.getTime - now
     if (timeRemaining < 0) {

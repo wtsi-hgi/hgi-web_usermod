@@ -11,7 +11,8 @@ object ApplicationBuild extends Build {
     // Add your project dependencies here,
     jdbc,
     "com.typesafe.play" %% "play-slick" % "0.3.2",
-    "org.scalaz" %% "scalaz-core" % "7.0.0"
+    "org.scalaz" %% "scalaz-core" % "7.0.0",
+    "commons-codec" % "commons-codec" % "1.8"
   )
 
 

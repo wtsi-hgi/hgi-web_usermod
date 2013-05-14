@@ -68,7 +68,6 @@ abstract class Authenticated(keyString: String) {
     token <- decodeToken(getToken(auth)) if verifyHmac(token)
   } yield token.user
 
-  // TODO work out unauthorized behaviour.
   protected[this] def onUnauthorized(request: RequestHeader) = Results.Unauthorized.withHeaders("WWW-Authenticate" -> "Bearer error=\"invalid_token\"")
 
   /**

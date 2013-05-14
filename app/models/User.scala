@@ -7,12 +7,19 @@ import play.api.db.slick.DB
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.Json
 import scala.util.control.Exception.nonFatalCatch
+import javax.naming.directory.InitialDirContext
+import global.LDAPProvider
 
 case class User(sid: String)
 object User {
   implicit val toJson = Json.writes[User]
+  val ldap = current.configuration.getString("ldap.server").map(new LDAPProvider(_))
 
   def all() = Users.all.map(a => User(a.sid))
+
+  private def add(user: User) = DB.withSession { implicit session =>
+    Users.forInsert insert user.sid
+  }
 
   private[models] def get(id: Long) = DB.withSession { implicit session =>
     Query(Users).filter(_.id === id).firstOption.map(u => User(u.sid))
@@ -20,6 +27,20 @@ object User {
 
   def get(sid: String) = DB.withSession { implicit session =>
     Query(Users).filter(_.sid === sid).firstOption.map(u => User(u.sid))
+  }
+
+  /**
+   * Get a user from the database, or else fetch from LDAP and add to the database.
+   */
+  private def getOrFetchLdap(sid: String): Option[UserDO] = DB.withSession { implicit session =>
+    (Query(Users).filter(_.sid === sid).firstOption, ldap) match {
+      case (u @ Some(_), _) => u
+      case (None, Some(ldap)) => {
+        ldap.lookup(sid).map(_ => UserDO(add(User(sid)), sid))
+      }
+      case (None, None) => None
+    }
+
   }
 
   def roles(sid: String) = DB.withSession { implicit session =>
@@ -43,7 +64,7 @@ object User {
     }
 
     for {
-      user <- Query(Users).filter(_.sid === sid).firstOption.toRight(Seq("User " + sid + " does not exist in the system.")).right
+      user <- getOrFetchLdap(sid).toRight(Seq("User " + sid + " does not exist in the system.")).right
       insertedRole <- models.Role.add(role).right
       insertedUserRole <- insertUserRole(user.id, insertedRole).right
     } yield insertedRole

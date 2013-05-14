@@ -13,6 +13,7 @@ private[models] class Users extends Table[UserDO]("USERS") with StandardQueries[
   def sid = column[String]("sid", O.NotNull)
 
   def * = id ~ sid <> (UserDO.apply _, UserDO.unapply _)
+  def forInsert = sid returning id
   
   def roles = UserRoles.filter(_.userId === id).flatMap(_.role)
 }

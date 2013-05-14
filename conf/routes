@@ -4,6 +4,8 @@
 
 # Home page
 GET    /                          controllers.Application.index
+GET    /testAuthentication        controllers.Application.testAuth
+
 GET		 /users						          controllers.User.all
 GET    /users/:sid                controllers.User.get(sid : String)
 GET    /users/:sid/roles          controllers.User.roles(sid : String)

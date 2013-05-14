@@ -69,7 +69,7 @@ abstract class Authenticated(keyString: String) {
   } yield token.user
 
   // TODO work out unauthorized behaviour.
-  protected[this] def onUnauthorized(request: RequestHeader) = Results.Unauthorized
+  protected[this] def onUnauthorized(request: RequestHeader) = Results.Unauthorized.withHeaders("WWW-Authenticate" -> "Bearer error=\"invalid_token\"")
 
   /**
    * Wrap the given action in an authentication context. It will only be executed if successful authentication is presented.

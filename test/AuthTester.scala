@@ -1,7 +1,7 @@
 import org.apache.commons.codec.binary.Base64._
-import global.Authenticated
+import global.BearerAuth
 
-class AuthTester(key: String) extends Authenticated(key) {
+class AuthTester(key: String) extends BearerAuth(key) {
 
   def verify(raw: String) = decodeToken(raw).map(verifyHmac)
 

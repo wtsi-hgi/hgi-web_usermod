@@ -27,14 +27,23 @@ class BasicAuth(val keyString: String) extends AuthProvider with Hmac {
     Logger.debug(s"Token: $token")
     val parts = new String(Base64.decodeBase64(token)).split(":").toList
     parts match {
-      case (user :: (L(expires) :: shib :: salt :: mac :: Nil)) => Some(Token(user, new Date(expires * 1000), shib, salt, mac))
+      case (user :: password :: Nil) => {
+        val parts2 = new String(Base64.decodeBase64(user)).split(":").toList
+        parts2 match {
+          case (user :: (L(expires) :: shib :: salt :: Nil)) => Some(Token(user, new Date(expires * 1000), shib, salt, password))
+          case _ => {
+            Logger.debug(s"Cannot parse password: $password")
+            None
+          }
+        }
+      }
       case _ => {
-        Logger.debug("Cannot parse token: " + token)
+        Logger.debug(s"Cannot parse token: $token")
         None
       }
     }
   }
-  
+
   def username(request: RequestHeader) = for {
     auth <- request.headers.get("Authorization")
     token <- decodeToken(getToken(auth)) if verifyHmac(token)

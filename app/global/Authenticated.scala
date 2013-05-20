@@ -17,11 +17,11 @@ trait AuthProvider {
 }
 
 trait Hmac {
-  val keyString : String
-  
-    protected[this] case class Token(user: String, expires: Date, shib: String, salt: String, mac: String)
-    
-    protected[this] def hmac(raw: Array[Byte]) = {
+  val keyString: String
+
+  protected[this] case class Token(user: String, expires: Date, shib: String, salt: String, mac: String)
+
+  protected[this] def hmac(raw: Array[Byte]) = {
     val key = new SecretKeySpec(Base64.decodeBase64(keyString), "HmacMD5")
     val mac = Mac.getInstance("HmacMD5")
     mac.init(key)
@@ -57,4 +57,5 @@ abstract class Authenticated(authProviders: AuthProvider*) {
   }
 }
 
-object Authenticated extends Authenticated(new BearerAuth(current.configuration.getString("hgiweb.secretkey").getOrElse("default")))
+object Authenticated extends Authenticated(new BearerAuth(current.configuration.getString("hgiweb.secretkey").getOrElse("default")),
+  new BasicAuth(current.configuration.getString("hgiweb.secretkey").getOrElse("default")))

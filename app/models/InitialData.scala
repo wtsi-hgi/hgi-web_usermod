@@ -16,6 +16,7 @@ object InitialData {
     MetaRoles.set_global_role,
     MetaRoles.create_project,
     MetaRoles.delegate,
+    MetaRoles.grant_project_role,
     RoleType("manage_project_users", Some("Can manage users for this project."), initialParameterTypes),
     RoleType("manage_project_datasets", Some("Can manage datasets for this project."), initialParameterTypes),
     RoleType("manage_project_resources", Some("Can manage resources for this project."), initialParameterTypes))

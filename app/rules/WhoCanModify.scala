@@ -3,7 +3,7 @@ package rules
 import models._
 
 object WhoCanModify {
-  
+
   val set_global_role = MetaRoles.set_global_role.instantiate(Map.empty[String, String]).get
 
   def canDo(user: User, to: User, what: Role): Boolean = {
@@ -14,11 +14,15 @@ object WhoCanModify {
       // user can assign what to to if:
       // user has role 'what'
       // user has role 'delegate project' for the project of 'what'
+      // user has role 'grant_project_role' for the project of 'what' and for the given role.
       val project = what.parameters.find(_.name == "project") // Project role
       project match {
         case Some(p) => {
           val delegate_project = MetaRoles.delegate.instantiate(Seq(p)).get
+          val grant_project_role = MetaRoles.grant_project_role.instantiate(Seq(p, Parameter("role", what.name))).get
           if (User.hasRole(user.sid, what) && User.hasRole(user.sid, delegate_project)) {
+            true
+          } else if (User.hasRole(user.sid, grant_project_role)) {
             true
           } else {
             false

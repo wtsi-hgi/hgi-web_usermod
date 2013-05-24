@@ -5,6 +5,7 @@
 # Home page
 GET    /                          controllers.Application.index
 GET    /testAuthentication        controllers.Application.testAuth
+GET    /searchUsers/:pattern      controllers.Application.searchUsers(pattern : String)
 
 GET		 /users						          controllers.User.all
 GET    /users/:sid                controllers.User.get(sid : String)

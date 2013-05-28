@@ -4,6 +4,7 @@ import play.api._
 import models._
 import models.dao._
 import rules.MetaRoles
+import java.sql.{ Date => SQLDate }
 
 object InitialData {
 
@@ -22,7 +23,7 @@ object InitialData {
     RoleType("manage_project_resources", Some("Can manage resources for this project."), initialParameterTypes))
 
   val initialUsers = Seq(
-    UserDO(1L, "nc6@sanger.ac.uk"))
+    UserDO(1L, "nc6@sanger.ac.uk", "Nicholas Clarke"))
 
   val initialUserRoles = Seq(
     "nc6@sanger.ac.uk" -> set_global_role)

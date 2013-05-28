@@ -20,12 +20,22 @@ class LDAPProvider(serverUrl: String) {
     new InitialDirContext(ht)
   }
 
+  // Yuck yuck yuck.
   def lookup(sid: String) = {
     val searchControls = new SearchControls
     searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE)
     val search = context.search("ou=people,dc=sanger,dc=ac,dc=uk", s"mail=$sid", searchControls)
     if (search.hasMoreElements()) {
-      Some(sid)
+      val a = search.nextElement().getAttributes()
+      val cn = a.get("cn")
+      if (null != cn) {
+        cn.get() match {
+          case x: String => Some(x)
+          case _ => None
+        }
+      } else {
+        None
+      }
     } else {
       None
     }
@@ -46,7 +56,7 @@ class LDAPProvider(serverUrl: String) {
         attr.get().toString()
       }).toSeq
     }
-    
+
     allUsers.filter(_.startsWith(pattern))
   }
 }

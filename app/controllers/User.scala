@@ -32,7 +32,7 @@ object User extends Controller {
   def addRole(sid: String) = authenticated { user =>
     Action(parse.json) { request =>
       request.body.validate[Role].map { role =>
-        if (canDo(models.User(user), models.User(sid), role)) {
+        if (canDo(user, sid, role)) {
           models.User.addRole(sid, role) match {
             case Right(id) => Ok(Json.obj("id" -> id))
             case Left(errs) => Forbidden(Json.arr(errs))

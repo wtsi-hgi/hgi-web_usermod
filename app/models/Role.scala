@@ -61,7 +61,7 @@ object Role {
    */
   def users(role: Role) = DB.withSession { implicit session =>
     find(role) match {
-      case Some(id) => Query(UserRoles).filter(_.roleId === id).flatMap(_.user).list.map(u => User(u.sid))
+      case Some(id) => Query(UserRoles).filter(_.roleId === id).flatMap(_.user).list.map(u => User(u.sid, u.name))
       case None => Seq()
     }
   }

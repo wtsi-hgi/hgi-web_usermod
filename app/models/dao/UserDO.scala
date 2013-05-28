@@ -1,19 +1,21 @@
 package models.dao
 
+import java.sql.Date
 import play.api.libs.functional.syntax._
 import play.api.Play.current
 import play.api.db.slick.DB
 import play.api.db.slick.Config.driver.simple._
 
-private[models] case class UserDO(id: Long, sid: String)
+private[models] case class UserDO(id: Long, sid: String, name : String)
 
 private[models] class Users extends Table[UserDO]("USERS") with StandardQueries[UserDO] {
   
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def sid = column[String]("sid", O.NotNull)
-
-  def * = id ~ sid <> (UserDO.apply _, UserDO.unapply _)
-  def forInsert = sid returning id
+  def name = column[String]("name")
+  
+  def * = id ~ sid ~ name <> (UserDO.apply _, UserDO.unapply _)
+  def forInsert = sid ~ name returning id
   
   def roles = UserRoles.filter(_.userId === id).flatMap(_.role)
 }

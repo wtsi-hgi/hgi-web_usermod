@@ -10,23 +10,23 @@ import scala.util.control.Exception.nonFatalCatch
 import javax.naming.directory.InitialDirContext
 import global.LDAPProvider
 
-case class User(sid: String)
+case class User(sid: String, name : String)
 object User {
   implicit val toJson = Json.writes[User]
   val ldap = current.configuration.getString("ldap.server").map(new LDAPProvider(_))
 
-  def all() = Users.all.map(a => User(a.sid))
+  def all() = Users.all.map(a => User(a.sid, a.name))
 
   private def add(user: User) = DB.withSession { implicit session =>
-    Users.forInsert insert user.sid
+    Users.forInsert insert (user.sid, user.name)
   }
 
   private[models] def get(id: Long) = DB.withSession { implicit session =>
-    Query(Users).filter(_.id === id).firstOption.map(u => User(u.sid))
+    Query(Users).filter(_.id === id).firstOption.map(u => User(u.sid, u.name))
   }
 
   def get(sid: String) = DB.withSession { implicit session =>
-    Query(Users).filter(_.sid === sid).firstOption.map(u => User(u.sid))
+    Query(Users).filter(_.sid === sid).firstOption.map(u => User(u.sid, u.name))
   }
 
   /**
@@ -36,11 +36,10 @@ object User {
     (Query(Users).filter(_.sid === sid).firstOption, ldap) match {
       case (u @ Some(_), _) => u
       case (None, Some(ldap)) => {
-        ldap.lookup(sid).map(_ => UserDO(add(User(sid)), sid))
+        ldap.lookup(sid).map(cn => UserDO(add(User(sid, cn)), sid, cn))
       }
-      case (None, None) => None
+      case _ => None
     }
-
   }
 
   def roles(sid: String) = DB.withSession { implicit session =>

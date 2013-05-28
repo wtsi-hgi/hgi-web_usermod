@@ -76,7 +76,7 @@ object Role extends Controller {
   def addUserRole(sid: String, role: String) = authenticated { user =>
     Action {
       withParsedRole(role) { role =>
-        if (canDo(models.User(user), models.User(sid), role)) {
+        if (canDo(user, sid, role)) {
           models.User.addRole(sid, role) match {
             case Right(id) => Ok(Json.obj("id" -> id))
             case Left(errs) => Forbidden(Json.arr(errs))
@@ -98,7 +98,7 @@ object Role extends Controller {
   def deleteUserRole(sid: String, role: String) = authenticated { user =>
     Action {
       withParsedRole(role) { role =>
-        if (canDo(models.User(user), models.User(sid), role)) {
+        if (canDo(user, sid, role)) {
           val numRemoved = models.User.removeRole(sid, role)
           numRemoved match {
             case Some(number) => Ok(Json.obj("removed" -> number))

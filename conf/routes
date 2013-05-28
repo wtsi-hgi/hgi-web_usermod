@@ -17,6 +17,7 @@ DELETE /users/:sid/roles/:role    controllers.Role.deleteUserRole(sid : String, 
 
 
 GET		/roleTypes						      controllers.RoleType.all
+POST  /roleTypes                  controllers.RoleType.add
 GET   /roleTypes/:name            controllers.RoleType.get(name : String)
 GET   /roleTypes/:name/parameters controllers.RoleType.parameters(name : String)
 

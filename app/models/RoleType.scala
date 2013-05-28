@@ -55,6 +55,14 @@ object RoleType {
     coaelesce(q1.list).headOption
   }
 
+  def add(role: RoleType) = DB.withSession { implicit session =>
+    Query(RoleTypes).filter(_.name === role.name).firstOption match {
+      case Some(rt) if (get(rt.name).map(_ == role).getOrElse(false)) => Right(rt.id)
+      case None => Right(insert(role))
+      case _ => Left(Seq("Role already exists but does not match!"))
+    }
+  }
+
   /**
    * Get all the parameters for a given role type.
    */

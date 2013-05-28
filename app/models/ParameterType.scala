@@ -20,11 +20,13 @@ object ParameterType {
     Query(ParameterTypes).filter(_.name === name).firstOption
   }
   
+  def add(pt : ParameterType) = getOrInsert(pt)
+  
   /**
    * Check whether a matching parameter type already exists in the database, and
    * return its id if so. Otherwise, add a new parameter type and return that id.
    */
-  def getOrInsert(pt : ParameterType) : Long = DB.withSession { implicit session =>
+  private[models] def getOrInsert(pt : ParameterType) : Long = DB.withSession { implicit session =>
     get(pt.name).map(_.id).getOrElse(insert(pt))
   }
   

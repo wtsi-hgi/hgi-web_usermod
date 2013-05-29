@@ -3,6 +3,8 @@ package rules
 import models._
 
 object MetaRoles {
+  
+  val all = Seq(set_global_role, delegate, grant_project_role, create_project)
 
   /**
    * Users with the 'set_global_role' role can do pretty much anything, apart from removing it from themselves!

@@ -63,6 +63,31 @@ object RoleType {
     }
   }
 
+  def delete(role: RoleType) = DB.withSession { implicit session =>
+    // Need to kill all parameters + roles using this role type.
+    val roleType = Query(RoleTypes).filter(_.name === role.name)
+    val roles = roleType flatMap (a => Query(Roles).filter(_.rtId === a.id));
+
+    {
+      val ids = roles.map(_.id).list
+      for (id <- ids) {
+        Query(dao.Parameters).filter(_.roleId === id).delete
+        Query(dao.Roles).filter(_.id === id).delete
+      }
+    }
+    roleType.delete
+  }
+
+  def addParameter(name: String, parameter: ParameterType) = DB.withSession { implicit session =>
+    val pId = models.ParameterType.add(parameter)
+    val roleId = Query(RoleTypes).filter(_.name === name).map(_.id).firstOption
+
+    roleId match {
+      case Some(id) => Right(RoleTypeParameterTypes.insert(id, pId))
+      case None => Left(Seq(s"Cannot add parameter to non-existent role: $name"))
+    }
+  }
+
   /**
    * Get all the parameters for a given role type.
    */

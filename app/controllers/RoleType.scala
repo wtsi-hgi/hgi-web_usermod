@@ -8,6 +8,7 @@ import play.api.libs.json.JsError
 import models._
 import global.Authenticated.authenticated
 import rules.WhoCanModify._
+import rules.MetaRoles
 
 import models._
 
@@ -39,6 +40,21 @@ object RoleType extends Controller {
         }
       }.recoverTotal { jsErr =>
         BadRequest(JsError.toFlatJson(jsErr))
+      }
+    }
+  }
+
+  def delete(rolename: String) = authenticated { user =>
+    Action {
+      if (canSetGlobalRole(user)) {
+        val roleType = models.RoleType.get(rolename)
+        roleType match {
+          case Some(rt) if !MetaRoles.all.contains(rt) => Ok(Json.obj("deleted" -> models.RoleType.delete(rt)))
+          case Some(_) => Forbidden(Json.arr("Cannot remove metarole type: $rolename"))
+          case None => NotFound(Json.arr(s"Cannot find role type: $rolename"))
+        }
+      } else {
+        Forbidden(Json.arr("No permission to set global roles."))
       }
     }
   }

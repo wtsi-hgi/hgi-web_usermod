@@ -17,3 +17,5 @@ From which you can enter the play console:
 After which you can start a dev instance (in this case on port 9000) by running:
 [hgi-web_usermod] $ run 9000
 
+JVM versions lower than 1.7 may have errors on dome Linux machines relating to memory allocation after a fork (`java.io.IOException: error=12`) when running `sbt`. This can be solved by moving to JVM 1.7, or potentially by turning virtual memory overcommit on in the kernel (`echo 1 > /proc/sys/vm/overcommit_memory`).
+

@@ -1,4 +1,5 @@
-# User module for HGI-web, implementing role-based access control (RBAC). 
+# User module for HGI-web
+Implements role-based access control (RBAC). 
 
 ## Installation
 To install, clone the github repository, change into hgi-web_usermod, and run Scala Built Tool (sbt).

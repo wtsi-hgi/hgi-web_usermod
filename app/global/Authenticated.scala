@@ -46,7 +46,7 @@ import play.api.Play.current
 
 trait AuthProvider {
   def username(request: RequestHeader): Option[String]
-  def onUnauthorized(request: RequestHeader): Result => Result
+  def onUnauthorized(request: RequestHeader): SimpleResult => SimpleResult
 }
 
 trait Hmac {
@@ -78,7 +78,7 @@ trait Hmac {
 abstract class Authenticated(authProviders: AuthProvider*) {
 
   private[this] def username(request: RequestHeader): Option[String] = authProviders.map(_.username(request)).reduceLeft(_.orElse(_))
-  private[this] def onUnauthorized(request: RequestHeader) = ((Results.Unauthorized: Result) /: authProviders) { case (r, f) => f.onUnauthorized(request)(r) }
+  private[this] def onUnauthorized(request: RequestHeader) = ((Results.Unauthorized: SimpleResult) /: authProviders) { case (r, f) => f.onUnauthorized(request)(r) }
 
   /**
    * Wrap the given action in an authentication context. It will only be executed if successful authentication is presented.

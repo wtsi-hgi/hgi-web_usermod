@@ -34,14 +34,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package models.dao
 
 import play.api.db.slick.Config.driver.simple._
+import TupleMethods._
 
 case class RoleDO(id : Long, rtId : Long)
-private[models] class Roles extends Table[RoleDO]("ROLES") with StandardQueries[RoleDO] {
+private[models] class Roles(tag : Tag) extends Table[RoleDO](tag, "ROLES") {
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def rtId = column[Long]("role_type_id", O.NotNull)
   
-  def * = id ~ rtId <> (RoleDO.apply _, RoleDO.unapply _)
-  def forInsert = rtId returning id
+  def * = id ~ rtId <> (RoleDO.tupled, RoleDO.unapply)
   
   def roleType = foreignKey("r_role_type_fk", rtId, RoleTypes)(_.id)
   def parameters = Parameters.filter(_.roleId == id)

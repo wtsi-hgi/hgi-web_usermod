@@ -38,22 +38,22 @@ import play.api.libs.functional.syntax._
 import play.api.Play.current
 import play.api.db.slick.DB
 import play.api.db.slick.Config.driver.simple._
+import TupleMethods._
 
 private[models] case class UserDO(id: Long, sid: String, name : String)
 
-private[models] class Users extends Table[UserDO]("USERS") with StandardQueries[UserDO] {
+private[models] class Users(tag : Tag) extends Table[UserDO](tag, "USERS") {
   
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def sid = column[String]("sid", O.NotNull)
   def name = column[String]("name")
   
-  def * = id ~ sid ~ name <> (UserDO.apply _, UserDO.unapply _)
-  def forInsert = sid ~ name returning id
+  def * = id ~ sid ~ name <> (UserDO.tupled, UserDO.unapply)
   
   def roles = UserRoles.filter(_.userId === id).flatMap(_.role)
 }
 
-private[models] class UserRoles extends Table[(Long, Long)]("USER_ROLES") with StandardQueries[(Long, Long)] {
+private[models] class UserRoles(tag : Tag) extends Table[(Long, Long)](tag, "USER_ROLES") {
   def userId = column[Long]("user_id", O.NotNull)
   def roleId = column[Long]("role_id", O.NotNull)
   

@@ -40,6 +40,7 @@ import play.api.libs.functional.syntax._
 import play.api.db.slick.Config.driver.simple._
 
 import dao.ParameterTypes
+import dao.ParameterTypeDO
 
 case class ParameterType(name : String, description : Option[String]) {
   def instantiate(value : String) = Parameter(name, value)
@@ -50,7 +51,7 @@ object ParameterType {
   implicit val fromJson = Json.reads[ParameterType]
   
   def get(name : String) = DB.withSession { implicit session =>
-    Query(ParameterTypes).filter(_.name === name).firstOption
+    ParameterTypes.filter(_.name === name).firstOption
   }
   
   def add(pt : ParameterType) = getOrInsert(pt)
@@ -64,6 +65,7 @@ object ParameterType {
   }
   
   private def insert(pt : ParameterType) : Long = DB.withSession { implicit session =>
-    ParameterTypes.forInsert insert (pt.name, pt.description)
+    val ptdo = ParameterTypeDO(1, pt.name, pt.description)
+    ParameterTypes insert ptdo
   }
 }

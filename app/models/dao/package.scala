@@ -33,13 +33,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package models
 
+import play.api.db.slick.Config.driver.simple._
+
 package object dao {
-	val ParameterTypes = new ParameterTypes
-	val RoleTypes = new RoleTypes
-	val RoleTypeParameterTypes = new RoleTypeParameterTypes
+	val ParameterTypes = TableQuery[ParameterTypes]
+	val RoleTypes = TableQuery[RoleTypes]
+	val RoleTypeParameterTypes = TableQuery[RoleTypeParameterTypes]
 	
-	val Users = new Users
-	val Roles = new Roles
-	val UserRoles = new UserRoles
-	val Parameters = new Parameters
+	val Users = TableQuery[Users]
+	val Roles = TableQuery[Roles]
+	val UserRoles = TableQuery[UserRoles]
+	val Parameters = TableQuery[Parameters]
 }

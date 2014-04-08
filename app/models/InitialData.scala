@@ -39,6 +39,10 @@ import models.dao._
 import rules.MetaRoles
 import java.sql.{ Date => SQLDate }
 
+import play.api.Play.current
+import play.api.db.slick.DB
+import play.api.db.slick.Config.driver.profile.simple._
+
 object InitialData {
 
   val set_global_role = MetaRoles.set_global_role.instantiate(Map.empty[String, String]).get
@@ -61,12 +65,12 @@ object InitialData {
   val initialUserRoles = Seq(
     "nc6@sanger.ac.uk" -> set_global_role)
 
-  def insert() {
-    if (ParameterTypes.count == 0 && RoleTypes.count == 0) {
+  def insert() = DB.withSession { implicit session =>
+    if (ParameterTypes.length.run == 0 && RoleTypes.length.run == 0) {
       initialRoleTypes.foreach(RoleType.insert)
     }
 
-    if (Users.count == 0) {
+    if (Users.length.run == 0) {
       initialUsers.foreach(Users.insert)
       initialUserRoles.foreach(Function.tupled(User.addRole))
     }

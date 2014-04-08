@@ -94,7 +94,7 @@ object Role {
    */
   def users(role: Role) = DB.withSession { implicit session =>
     find(role) match {
-      case Some(id) => Query(UserRoles).filter(_.roleId === id).flatMap(_.user).list.map(u => User(u.sid, u.name))
+      case Some(id) => UserRoles.filter(_.roleId === id).flatMap(_.user).list.map(u => User(u.sid, u.name))
       case None => Seq()
     }
   }
@@ -111,7 +111,7 @@ object Role {
     find(role) match {
       case Some(id) => Right(id)
       case None => {
-        val q = Query(RoleTypes).filter(_.name === role.name)
+        val q = RoleTypes.filter(_.name === role.name)
         val roleType = q.firstOption.toRight("Cannot add role for missing role type: " + role.name)
         val parameterIdMap = q.flatMap(_.parameters).map(a => a.name -> a.id).list.toMap
 
@@ -130,8 +130,8 @@ object Role {
 
         ids.right.map {
           case (roleTypeId, parameters) => {
-            val roleId = dao.Roles.forInsert insert roleTypeId
-            parameters.foreach { case (id, value) => dao.Parameters.forInsert insert (roleId, id, value) }
+            val roleId = dao.Roles insert RoleDO(1,roleTypeId)
+            parameters.foreach { case (id, value) => dao.Parameters insert ParameterDO(1, roleId, id, value) }
             roleId
           }
         }
@@ -144,9 +144,9 @@ object Role {
    */
   def remove(role: Role) = DB.withSession { implicit session =>
     find(role) map { id =>
-      Query(UserRoles).filter(_.roleId === id).delete
-      Query(dao.Parameters).filter(_.roleId === id).delete
-      Query(Roles).filter(_.id === id).delete
+      UserRoles.filter(_.roleId === id).delete
+      dao.Parameters.filter(_.roleId === id).delete
+      Roles.filter(_.id === id).delete
     }
   }
 }

@@ -89,7 +89,7 @@ object RoleType {
   }
 
   def add(role: RoleType) = DB.withSession { implicit session =>
-    Query(RoleTypes).filter(_.name === role.name).firstOption match {
+    RoleTypes.filter(_.name === role.name).firstOption match {
       case Some(rt) if (get(rt.name).map(_ == role).getOrElse(false)) => Right(rt.id)
       case None => Right(insert(role))
       case _ => Left(Seq("Role already exists but does not match!"))
@@ -98,20 +98,20 @@ object RoleType {
 
   def delete(role: RoleType) = DB.withSession { implicit session =>
     // Need to kill all parameters + roles using this role type.
-    val roleType = Query(RoleTypes).filter(_.name === role.name)
-    val roles = roleType flatMap (a => Query(Roles).filter(_.rtId === a.id));
+    val roleType = RoleTypes.filter(_.name === role.name)
+    val roles = roleType flatMap (a => Roles.filter(_.rtId === a.id));
     {
       val ids = roleType.map(_.id).list
       for (id <- ids) {
-        Query(RoleTypeParameterTypes).filter(_.rtId === id).delete
+        RoleTypeParameterTypes.filter(_.rtId === id).delete
       }
     }
     {
       val ids = roles.map(_.id).list
       for (id <- ids) {
-        Query(dao.UserRoles).filter(_.roleId === id).delete
-        Query(dao.Parameters).filter(_.roleId === id).delete
-        Query(dao.Roles).filter(_.id === id).delete
+        dao.UserRoles.filter(_.roleId === id).delete
+        dao.Parameters.filter(_.roleId === id).delete
+        dao.Roles.filter(_.id === id).delete
       }
     }
     roleType.delete
@@ -119,7 +119,7 @@ object RoleType {
 
   def addParameter(name: String, parameter: ParameterType) = DB.withSession { implicit session =>
     val pId = models.ParameterType.add(parameter)
-    val roleId = Query(RoleTypes).filter(_.name === name).map(_.id).firstOption
+    val roleId = RoleTypes.filter(_.name === name).map(_.id).firstOption
 
     roleId match {
       case Some(id) => Right(RoleTypeParameterTypes.insert(id, pId))
@@ -141,7 +141,7 @@ object RoleType {
 
   private[models] def insert(rt: RoleType) = DB.withSession { implicit session =>
     val params = rt.parameters.map(ParameterType.getOrInsert)
-    val roleType = RoleTypes.forInsert insert (rt.name, rt.description)
+    val roleType = (RoleTypes returning RoleTypes.map(_.id)) insert RoleTypeDO(1, rt.name, rt.description)
     params.foreach(RoleTypeParameterTypes.insert(roleType, _))
     roleType
   }

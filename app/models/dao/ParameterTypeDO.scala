@@ -34,17 +34,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package models.dao
 
 import play.api.db.slick.Config.driver.simple._
+import TupleMethods._
 
 /**
  * A parameter to a role type.
  */
 private[models] case class ParameterTypeDO(id: Long, name: String, description: Option[String])
 
-private[models] class ParameterTypes extends Table[ParameterTypeDO]("PARAMETER_TYPES") with StandardQueries[ParameterTypeDO] {
+private[models] class ParameterTypes(tag : Tag) extends Table[ParameterTypeDO](tag, "PARAMETER_TYPES") {
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def name = column[String]("name", O.NotNull)
   def description = column[String]("description", O.Nullable)
 
-  def * = id ~ name ~ description.? <> (ParameterTypeDO.apply _, ParameterTypeDO.unapply _)
-  def forInsert = name ~ description.? returning id
+  def * = id ~ name ~ description.? <> (ParameterTypeDO.tupled, ParameterTypeDO.unapply)
 }

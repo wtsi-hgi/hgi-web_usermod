@@ -48,25 +48,27 @@ object User {
   implicit val toJson = Json.writes[User]
   val ldap = current.configuration.getString("ldap.server").map(new LDAPProvider(_))
 
-  def all() = Users.all.map(a => User(a.sid, a.name))
+  def all() = DB.withSession { implicit session =>
+    Users.run.map(a => User(a.sid, a.name))
+  }
 
   private def add(user: User) = DB.withSession { implicit session =>
-    Users.forInsert insert (user.sid, user.name)
+    Users insert UserDO(1, user.sid, user.name)
   }
 
   private[models] def get(id: Long) = DB.withSession { implicit session =>
-    Query(Users).filter(_.id === id).firstOption.map(u => User(u.sid, u.name))
+    Users.filter(_.id === id).firstOption.map(u => User(u.sid, u.name))
   }
 
   def get(sid: String) = DB.withSession { implicit session =>
-    Query(Users).filter(_.sid === sid).firstOption.map(u => User(u.sid, u.name))
+    Users.filter(_.sid === sid).firstOption.map(u => User(u.sid, u.name))
   }
 
   /**
    * Get a user from the database, or else fetch from LDAP and add to the database.
    */
   private def getOrFetchLdap(sid: String): Option[UserDO] = DB.withSession { implicit session =>
-    (Query(Users).filter(_.sid === sid).firstOption, ldap) match {
+    (Users.filter(_.sid === sid).firstOption, ldap) match {
       case (u @ Some(_), _) => u
       case (None, Some(ldap)) => {
         ldap.lookup(sid).map(cn => UserDO(add(User(sid, cn)), sid, cn))
@@ -76,7 +78,7 @@ object User {
   }
 
   def roles(sid: String) = DB.withSession { implicit session =>
-    val rdos = Query(Users).filter(_.sid === sid).flatMap(_.roles).list
+    val rdos = Users.filter(_.sid === sid).flatMap(_.roles).list
     rdos.map(rdo => Role.get(rdo.id)).collect { case Some(a) => a }
   }
 
@@ -89,7 +91,7 @@ object User {
   def addRole(sid: String, role: Role) = DB.withSession { implicit session =>
 
     def insertUserRole(user: Long, role: Long) = {
-      Query(UserRoles).filter(ur => ur.roleId === role && ur.userId === user).firstOption.map(ur => Right(ur._1)).getOrElse {
+      UserRoles.filter(ur => ur.roleId === role && ur.userId === user).firstOption.map(ur => Right(ur._1)).getOrElse {
         val either = nonFatalCatch.either(models.dao.UserRoles.insert((user, role)))
         either.left.map(a => Seq(a.getMessage()))
       }
@@ -107,9 +109,9 @@ object User {
    */
   def removeRole(sid: String, role: Role) = DB.withSession { implicit session =>
     for {
-      u <- Query(Users).filter(_.sid === sid).map(_.id).firstOption
+      u <- Users.filter(_.sid === sid).map(_.id).firstOption
       r <- Role.find(role)
-      ur = Query(UserRoles).filter(a => a.roleId === r && a.userId === u).delete
+      ur = UserRoles.filter(a => a.roleId === r && a.userId === u).delete
     } yield ur
   }
 }
